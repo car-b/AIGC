@@ -1,0 +1,25 @@
+from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders.url_selenium import SeleniumURLLoader 
+from langchain.document_loaders import SeleniumURLLoader
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.vectorstores import Weaviate
+import os
+import getpass
+
+os.environ["OPENAI_API_KEY"] = getpass.getpass("OpenAI API Key:")
+WEAVIATE_URL = getpass.getpass("WEAVIATE_URL:")
+os.environ["WEAVIATE_API_KEY"] = getpass.getpass("WEAVIATE_API_KEY:")
+WEAVIATE_API_KEY = os.environ["WEAVIATE_API_KEY"]
+
+urls = ["https://pubmed.ncbi.nlm.nih.gov/?term=B+cell&format=abstract"]
+loader = SeleniumURLLoader(urls=urls,browser="firefox",executable_path="D:/software/geckodriver.exe")
+data = loader.load()
+
+text_splitter = CharacterTextSplitter(separator="Abstract",chunk_overlap=0)
+docs = text_splitter.split_documents(data)
+embeddings = OpenAIEmbeddings()
+
+db = Weaviate.from_documents(docs, embeddings, weaviate_url=WEAVIATE_URL, by_text=False)
+query = "B cell"
+target = db.similarity_search(query, by_text=False,k=10)
+
