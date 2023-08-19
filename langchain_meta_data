@@ -1,0 +1,17 @@
+from langchain.chat_models import ChatOpenAI
+from langchain.document_transformers.openai_functions import create_metadata_tagger
+
+llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
+
+schema = {
+    "properties": {
+        "doi url": {"type": "string"},
+        "paper content": {"type": "string"},
+        "Keywords": {"type": "string"},
+        },
+    "required": ["doi url", "paper content", "Keywords"],
+}
+
+document_transformer = create_metadata_tagger(metadata_schema=schema, llm=llm)
+
+enhanced_documents = document_transformer.transform_documents(target)
